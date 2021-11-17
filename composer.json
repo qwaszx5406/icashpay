@@ -1,0 +1,29 @@
+{
+    "name": "icashpay/api",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Icashpay\\Api\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "vic",
+            "email": "vic@gcreate.com.tw"
+        }
+    ],
+    "require": {
+		"php": ">=7",
+		"laravel/framework": ">=5.5.0"
+	},
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Icashpay\\Api\\IcashpayApiServiceProvider"
+			],
+			"aliases": {
+				"IcashpayApi":  "Icashpay\\Api\\Facades\\IcashpayApiFacade"
+			}
+		}
+	 }
+}
