@@ -43,7 +43,7 @@ class IcashpayApi{
 		$iv_length = openssl_cipher_iv_length('AES-256-CBC');
 		$iv = openssl_random_pseudo_bytes($iv_length);
 		$encrypt = openssl_encrypt( $data, 'AES-256-CBC', $this->AES_256_key, 0, $iv);
-		print_r($encrypt);
+		// print_r($encrypt);
 		return base64_encode($encrypt);
 	}
 	
@@ -58,11 +58,13 @@ class IcashpayApi{
 	private function request_post( $endpoint, $data ){
 		try{
 			$response = Http::timeout(10)->post($this->gateway . '/' . $endpoint, $data );
-			dump($response);
 			if( $response->status() == 200 ){
+				if( $response->json() == null ){
+					return false;
+				}
 				return $response->json();
 			}else{
-				return false;  
+				return false;
 			}
 		}catch(\Exception $ex){
 			// return $ex;   
@@ -83,17 +85,20 @@ class IcashpayApi{
 		return $data;
 	}
 	
-	/**
-	 * 取得綁定特電通知
-	 */
-	public function ICPBindingNotify_response()
-    {
-		$data = file_get_contents('php://input');
+	public function mainaction( $request ){
+		$value = [
+			'UserID' => '',
+			'DisplayInformation' => '',
+			'MerchantID' => $this->MerchantID,
+			'MerchantTradeNo' => '',
+			'ReturnURL' => ''
+		];
+		if( is_array($request) ){
+			$value = array_merge( $value, $request );
+		}
+		$value = $this->AES_256_encript($value);
 		
-		
-		return $response;
-		$response = json_decode($data, true);
-		return $this->AES_256_decript($response['EncData']);
+		return "icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=" . $value . "&Valuetype=1";
 	}
 	
 	/**
@@ -101,7 +106,18 @@ class IcashpayApi{
 	 */
 	public function CancelICPBinding($request){
 		$data = $this->get_requset_data();
-		$data['EncData'] = $this->AES_256_encript($request);
+		$EncData = [
+			'PlatformID' => $this->PlatformID,
+			'MerchantID' => $this->MerchantID,
+			'WalletID' => $this->WalletID,
+			'MerchantTradeNo' => '',
+			'TokenNo' => '',
+			'CancelBindingDate' => ''
+		];
+		if( is_array($request) ){
+			$EncData = array_merge( $EncData, $request );
+		}
+		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'CancelICPBinding', $data );
 		
 		return $response;
@@ -114,7 +130,51 @@ class IcashpayApi{
 	 */
 	public function DeductICPOB($request){
 		$data = $this->get_requset_data();
-		$data['EncData'] = $this->AES_256_encript($request);
+		$EncData = [
+			'PlatformID' => $this->PlatformID,
+			'MerchantID' => $this->MerchantID,
+			'WalletID' => $this->WalletID,
+			'MerchantTradeNo' => '',
+			// 'StoreID' => '',
+			// 'StoreName' => '',
+			// 'MerchantTID' => '',
+			// 'PosRefNo' => '',
+			'CarrierType' => 'EK0004',
+			'MerchantTradeDate' => '', // yyyy/MM/dd HH:mm:ss
+			'ItemAmt' => '',
+			'UtilityAmt' => '',
+			'CommAmt' => '',
+			'ExceptAmt1' => '',
+			'ExceptAmt2' => '',
+			'RedeemFlag' => '',
+			'BonusAmt' => '',
+			'DebitPoint' => '',
+			'NonRedeemAmt' => '',
+			'NonPointAmt' => '',
+			// 'ItemList' => [
+				// [
+					// 'ItemName'
+					// 'Quantity'
+					// 'Remark'
+				// ]
+			// ],
+			'TradeDesc' => '',
+			'ItemName' => '',
+			// 'ItemType' => '',
+			'ItemAmount' => '',
+			'ItemQty' => '',
+			'InvoiceNo' => '',
+			// 'Description' => '',
+			// 'CustomField1' => '',
+			// 'CustomField2' => '',
+			// 'CustomField3' => '',
+			'TokenNo' => ''
+		];
+		
+		if( is_array($request) ){
+			$EncData = array_merge( $EncData, $request );
+		}
+		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'DeductICPOB', $data );
 		
 		return $response;
@@ -127,7 +187,17 @@ class IcashpayApi{
 	 */
 	public function QueryTradeICPO($request){
 		$data = $this->get_requset_data();
-		$data['EncData'] = $this->AES_256_encript($request);
+		$EncData = [
+			'PlatformID' => $this->PlatformID,
+			'MerchantID' => $this->MerchantID,
+			'WalletID' => $this->WalletID,
+			'MerchantTradeNo' => ''
+		];
+		
+		if( is_array($request) ){
+			$EncData = array_merge( $EncData, $request );
+		}
+		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'QueryTradeICPO', $data );
 		
 		return $response;
@@ -140,7 +210,31 @@ class IcashpayApi{
 	 */
 	public function RefundICPO($request){
 		$data = $this->get_requset_data();
-		$data['EncData'] = $this->AES_256_encript($request);
+		$EncData = [
+			'PlatformID' => $this->PlatformID,
+			'MerchantID' => $this->MerchantID,
+			'WalletID' => $this->WalletID,
+			'TransactionID' => '',
+			'Amount' => '',
+			'StoreID' => '',
+			'StoreName' => '',
+			'MerchantTradeNo' => '',
+			'OMerchantTradeNo' => '',
+			'MerchantTradeDate' => '',
+			'BonusAmt' => '',
+			'DebitPoint' => '',
+			'FeeAmt' => '',
+			'BillNo' => '',
+			'BillItem' => '',
+			'BillAmt' => '',
+			'BillFee' => '',
+			'BillBarcode' => '',
+		];
+		
+		if( is_array($request) ){
+			$EncData = array_merge( $EncData, $request );
+		}
+		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'RefundICPO', $data );
 		
 		return $response;
