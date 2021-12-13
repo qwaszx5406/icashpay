@@ -9,8 +9,11 @@ class IcashpayApi{
 	private $PlatformID;	
 	private $MerchantID;	
 	private $WalletID;	
+	private $ICPMID;
 	private $Version;
 	private $EncKeyID;
+	private $ServerPublicKey;
+	private $ClientPublicKey;
 	private $ClientPrivateKey;
 	private $ICP_public_key;
 	private $AES_256_key;
@@ -21,9 +24,12 @@ class IcashpayApi{
 		$this->PlatformID = config('icashpay.PlatformID');	
 		$this->MerchantID = config('icashpay.MerchantID');	
 		$this->WalletID = config('icashpay.WalletID');	
+		$this->ICPMID = config('icashpay.ICPMID');
 		$this->Version = config('icashpay.Version');	
-		$this->EncKeyID = config('icashpay.EncKeyID');
-		$this->ClientPrivateKey = config('icashpay.ClientPrivateKey');
+		$this->EncKeyID = config('icashpay.AES_key_ID');
+		$this->ServerPublicKey = config('icashpay.Server_Public_Key');
+		$this->ClientPublicKey = config('icashpay.Client_Public_Key');
+		$this->ClientPrivateKey = config('icashpay.Client_Private_Key');
 		$this->ICP_public_key = config('icashpay.ICP_public_key');
 		$this->AES_256_key = config('icashpay.AES_256_key');
 		$this->iv = config('icashpay.iv');
@@ -51,13 +57,16 @@ class IcashpayApi{
 		// return $data;
 		/*********************************************/
 		$data = base64_decode( $data );
-		$decrypt = openssl_decrypt( $data, 'AES-256-CBC', $this->AES_256_key, 0);
+		$decrypt = openssl_decrypt( $data, 'AES-256-CBC', $this->AES_256_key, 0, $this->iv);
 		return $decrypt;
 	}
 	
 	private function request_post( $endpoint, $data ){
 		try{
-			$response = Http::timeout(10)->post($this->gateway . '/' . $endpoint, $data );
+			$response = Http::withHeaders([
+				'X-iCP-EncKeyID' => $this->AES_256_key,
+				'X-iCP-Signature' => $this->ClientPrivateKey,	
+			])::timeout(10)->post($this->gateway . '/' . $endpoint, $data );
 			if( $response->status() == 200 ){
 				if( $response->json() == null ){
 					return false;
@@ -78,8 +87,6 @@ class IcashpayApi{
 			'MerchantID' => $this->MerchantID,
 			'WalletID' => $this->WalletID,
 			'Version' => $this->Version,
-			'X-iCP-EncKeyID' => $this->AES_256_key,
-			'X-iCP-Signature' => $this->ClientPrivateKey,
 			'EncData' => [],
 		];
 		return $data;
@@ -120,7 +127,6 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'CancelICPBinding', $data );
 		
-		return $response;
 		$response = json_decode($response, true);
 		return $this->AES_256_decript($response['EncData']);
 	}
@@ -177,7 +183,7 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'DeductICPOB', $data );
 		
-		return $response;
+		
 		$response = json_decode($response, true);
 		return $this->AES_256_decript($response['EncData']);
 	}
@@ -200,7 +206,6 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'QueryTradeICPO', $data );
 		
-		return $response;
 		$response = json_decode($response, true);
 		return $this->AES_256_decript($response['EncData']);
 	}
@@ -237,7 +242,6 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'RefundICPO', $data );
 		
-		return $response;
 		$response = json_decode($response, true);
 		return $this->AES_256_decript($response['EncData']);
 	}
