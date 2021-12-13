@@ -26,6 +26,7 @@ class IcashpayApi{
 		$this->ClientPrivateKey = config('icashpay.ClientPrivateKey');
 		$this->ICP_public_key = config('icashpay.ICP_public_key');
 		$this->AES_256_key = config('icashpay.AES_256_key');
+		$this->iv = config('icashpay.iv');
 		$test_mode = config('icashpay.test_mode');
 		if( $test_mode ){
 			$this->gateway = config('icashpay.test_gateway');
@@ -40,9 +41,8 @@ class IcashpayApi{
 		if( is_array( $data ) ){
 			$data = json_encode( $data );
 		}
-		$iv_length = openssl_cipher_iv_length('AES-256-CBC');
-		$iv = openssl_random_pseudo_bytes($iv_length);
-		$encrypt = openssl_encrypt( $data, 'AES-256-CBC', $this->AES_256_key, 0, $iv);
+		
+		$encrypt = openssl_encrypt( $data, 'AES-256-CBC', $this->AES_256_key, 0, $this->iv);
 		// print_r($encrypt);
 		return base64_encode($encrypt);
 	}
