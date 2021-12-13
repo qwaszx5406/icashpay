@@ -10,7 +10,6 @@ return [
 	'Server_Public_Key' => '',
 	'Client_Public_Key' => '',
 	'Client_Private_Key'=> '',
-	'ICP_public_key'	=> '',
 	'AES_256_key'		=> '',
 	'iv'				=> '',
 	'test_mode'			=> true,

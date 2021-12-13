@@ -15,7 +15,6 @@ class IcashpayApi{
 	private $ServerPublicKey;
 	private $ClientPublicKey;
 	private $ClientPrivateKey;
-	private $ICP_public_key;
 	private $AES_256_key;
 	private $gateway;		
 	private $test_gateway;		
@@ -30,7 +29,6 @@ class IcashpayApi{
 		$this->ServerPublicKey = config('icashpay.Server_Public_Key');
 		$this->ClientPublicKey = config('icashpay.Client_Public_Key');
 		$this->ClientPrivateKey = config('icashpay.Client_Private_Key');
-		$this->ICP_public_key = config('icashpay.ICP_public_key');
 		$this->AES_256_key = config('icashpay.AES_256_key');
 		$this->iv = config('icashpay.iv');
 		$test_mode = config('icashpay.test_mode');
