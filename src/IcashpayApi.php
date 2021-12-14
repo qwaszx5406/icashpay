@@ -39,30 +39,37 @@ class IcashpayApi{
 		}	
 	}
 	
-	public function AES_256_encript( $data ){
+	public function AES_256_encript( $data, $encode = 'base64' ){
 		// return $data;
 		/*********************************************/
 		if( is_array( $data ) ){
 			$data = json_encode( $data );
 		}
 		
-		$encrypt = openssl_encrypt( $data, 'AES-256-CBC', $this->AES_256_key, 0, $this->iv);
+		$encrypt = openssl_encrypt( $data, 'aes-256-cbc', $this->AES_256_key, 0, $this->iv);
 		// print_r($encrypt);
-		return base64_encode($encrypt);
+		switch( $encode ){
+			case 'base64':
+				return base64_encode($encrypt);
+				break;
+			case 'urlencode':
+				return urlencode($encrypt);
+				break;
+		}
 	}
 	
 	public function AES_256_decript( $data ){
 		// return $data;
 		/*********************************************/
 		$data = base64_decode( $data );
-		$decrypt = openssl_decrypt( $data, 'AES-256-CBC', $this->AES_256_key, 0, $this->iv);
+		$decrypt = openssl_decrypt( $data, 'aes-256-cbc', $this->AES_256_key, 0, $this->iv);
 		return $decrypt;
 	}
 	
 	private function request_post( $endpoint, $data ){
 		try{
 			$response = Http::withHeaders([
-				'X-iCP-EncKeyID' => $this->AES_256_key,
+				'X-iCP-EncKeyID' => $this->EncKeyID,
 				'X-iCP-Signature' => $this->ClientPrivateKey,	
 			])::timeout(10)->post($this->gateway . '/' . $endpoint, $data );
 			if( $response->status() == 200 ){
@@ -85,6 +92,8 @@ class IcashpayApi{
 			'MerchantID' => $this->MerchantID,
 			'WalletID' => $this->WalletID,
 			'Version' => $this->Version,
+			'X-iCP-EncKeyID' => $this->EncKeyID,
+			'X-iCP-Signature' => $this->ClientPrivateKey,
 			'EncData' => [],
 		];
 		return $data;
@@ -101,9 +110,10 @@ class IcashpayApi{
 		if( is_array($request) ){
 			$value = array_merge( $value, $request );
 		}
-		$value = $this->AES_256_encript($value);
 		
-		return "icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=" . $value . "&Valuetype=1";
+		$value = $this->AES_256_encript($value, 'urlencode');
+		
+		return $value;
 	}
 	
 	/**
