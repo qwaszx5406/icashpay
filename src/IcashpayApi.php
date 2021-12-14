@@ -105,7 +105,8 @@ class IcashpayApi{
 			'DisplayInformation' => '',
 			'MerchantID' => $this->MerchantID,
 			'MerchantTradeNo' => '',
-			'ReturnURL' => ''
+			'ReturnURL' => '',
+			'QRCodeType' => 'Bind'
 		];
 		if( is_array($request) ){
 			$value = array_merge( $value, $request );
