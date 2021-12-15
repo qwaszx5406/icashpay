@@ -260,7 +260,7 @@ class IcashpayApi{
 	
 	public function generateQRfromGoogle( $chl, $widhtHeight ='300' ){
 		$chl = urlencode($chl); 
-		return sprintf('https://chart.apis.google.com/chart?chs=%sx%s&cht=qr&chl=%s',
+		return sprintf('https://chart.apis.google.com/chart?chs=%sx%s&cht=qr&chld=L|0&chl=%s',
 			$widhtHeight,
 			$widhtHeight,
 			$chl
