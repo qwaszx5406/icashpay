@@ -115,8 +115,7 @@ class IcashpayApi{
 		$value = $this->AES_256_encript($value, 'urlencode');
 		
 		return [
-			'bind_url' => sprintf( 'icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=%s&Valuetype=1', $value ),
-			'qrcode_url'  => $this->generateQRfromGoogle($value),
+			'qrcode_url'  => $this->generateQRfromGoogle(sprintf( 'icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=%s&Valuetype=1', $value )),
 		];
 	}
 	
