@@ -116,7 +116,7 @@ class IcashpayApi{
 		
 		return [
 			'bind_url' => sprintf( 'icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=%s&Valuetype=1', $value ),
-			'qrcode_url'  => $this->generateQRfromGoogle($payment_data),
+			'qrcode_url'  => $this->generateQRfromGoogle($value),
 		];
 	}
 	
