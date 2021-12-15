@@ -264,6 +264,6 @@ class IcashpayApi{
 			$widhtHeight,
 			$widhtHeight,
 			$chl
-		); 
+		);  
 	}
 }
