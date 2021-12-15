@@ -114,7 +114,10 @@ class IcashpayApi{
 		
 		$value = $this->AES_256_encript($value, 'urlencode');
 		
-		return $value;
+		return [
+			'bind_url' => sprintf( 'icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=%s&Valuetype=1', $value ),
+			'qrcode_url'  => $this->generateQRfromGoogle($payment_data),
+		];
 	}
 	
 	/**
@@ -253,5 +256,12 @@ class IcashpayApi{
 		
 		$response = json_decode($response, true);
 		return $this->AES_256_decript($response['EncData']);
+	}
+	
+	public function generateQRfromGoogle( $chl, $widhtHeight ='300', $EC_level='L', $margin='0' ){
+		$chl = urlencode($chl); 
+		return 'http://chart.apis.google.com/chart?chs=' . $widhtHeight . 'x' . $widhtHeight . ' 
+		&cht=qr&chld=' . $EC_level . '|' . $margin . '&chl=' . $chl . '" alt="QR code" widhtHeight="' . $widhtHeight . ' 
+		" widhtHeight="' . $widhtHeight; 
 	}
 }
