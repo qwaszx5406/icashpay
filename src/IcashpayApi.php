@@ -261,7 +261,6 @@ class IcashpayApi{
 	public function generateQRfromGoogle( $chl, $widhtHeight ='300', $EC_level='L', $margin='0' ){
 		$chl = urlencode($chl); 
 		return 'http://chart.apis.google.com/chart?chs=' . $widhtHeight . 'x' . $widhtHeight . ' 
-		&cht=qr&chld=' . $EC_level . '|' . $margin . '&chl=' . $chl . '" alt="QR code" widhtHeight="' . $widhtHeight . ' 
-		" widhtHeight="' . $widhtHeight; 
+		&cht=qr&chld=' . $EC_level . '|' . $margin . '&chl=' . $chl; 
 	}
 }
