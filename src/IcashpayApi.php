@@ -258,9 +258,12 @@ class IcashpayApi{
 		return $this->AES_256_decript($response['EncData']);
 	}
 	
-	public function generateQRfromGoogle( $chl, $widhtHeight ='300', $EC_level='L', $margin='0' ){
+	public function generateQRfromGoogle( $chl, $widhtHeight ='300' ){
 		$chl = urlencode($chl); 
-		return 'http://chart.apis.google.com/chart?chs=' . $widhtHeight . 'x' . $widhtHeight . ' 
-		&cht=qr&chld=' . $EC_level . '|' . $margin . '&chl=' . $chl; 
+		return sprintf('https://chart.googleapis.com/chart?chs=%sx%s&cht=qr&chl=%s',
+			$widhtHeight,
+			$widhtHeight,
+			$chl
+		); 
 	}
 }
