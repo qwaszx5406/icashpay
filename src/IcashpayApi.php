@@ -39,7 +39,7 @@ class IcashpayApi{
 		}	
 	}
 	
-	public function AES_256_encript( $data, $encode = 'base64' ){
+	public function AES_256_encript( $data ){
 		// return $data;
 		/*********************************************/
 		if( is_array( $data ) ){
@@ -48,20 +48,12 @@ class IcashpayApi{
 		
 		$encrypt = openssl_encrypt( $data, 'aes-256-cbc', $this->AES_256_key, 0, $this->iv);
 		// print_r($encrypt);
-		switch( $encode ){
-			case 'base64':
-				return base64_encode($encrypt);
-				break;
-			case 'urlencode':
-				return urlencode($encrypt);
-				break;
-		}
+		return urlencode($encrypt);
 	}
 	
 	public function AES_256_decript( $data ){
 		// return $data;
 		/*********************************************/
-		$data = base64_decode( $data );
 		$decrypt = openssl_decrypt( $data, 'aes-256-cbc', $this->AES_256_key, 0, $this->iv);
 		return $decrypt;
 	}
@@ -112,7 +104,7 @@ class IcashpayApi{
 			$value = array_merge( $value, $request );
 		}
 		
-		$value = $this->AES_256_encript($value, 'urlencode');
+		$value = $this->AES_256_encript($value);
 		
 		$url = sprintf( 'icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=%s&Valuetype=1', $value );
 		
