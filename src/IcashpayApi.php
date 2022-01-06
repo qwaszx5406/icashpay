@@ -147,8 +147,8 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'CancelICPBinding', $data );
 		
-		if( !$response['error'] ){
-			$response = json_decode($response, true);
+		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
+			$response = json_decode($response['data'], true);
 			return $this->AES_256_decript($response['EncData']);
 		}else{
 			return $response;
@@ -208,8 +208,8 @@ class IcashpayApi{
 		$response = $this->request_post( 'DeductICPOB', $data );
 		
 		
-		if( !$response['error'] ){
-			$response = json_decode($response, true);
+		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
+			$response = json_decode($response['data'], true);
 			return $this->AES_256_decript($response['EncData']);
 		}else{
 			return $response;
@@ -235,8 +235,8 @@ class IcashpayApi{
 		$response = $this->request_post( 'QueryTradeICPO', $data );
 		
 		
-		if( !$response['error'] ){
-			$response = json_decode($response, true);
+		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
+			$response = json_decode($response['data'], true);
 			return $this->AES_256_decript($response['EncData']);
 		}else{
 			return $response;
@@ -276,8 +276,8 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'RefundICPO', $data );
 		
-		if( !$response['error'] ){
-			$response = json_decode($response, true);
+		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
+			$response = json_decode($response['data'], true);
 			return $this->AES_256_decript($response['EncData']);
 		}else{
 			return $response;
