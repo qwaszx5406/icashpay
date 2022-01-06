@@ -63,20 +63,27 @@ class IcashpayApi{
 			$response = Http::withHeaders([
 				'X-iCP-EncKeyID' => $this->EncKeyID,
 				'X-iCP-Signature' => $this->ClientPrivateKey,	
-			])::timeout(10)->post($this->gateway . '/' . $endpoint, $data );
+			])->timeout(10)->post($this->gateway . '/' . $endpoint, $data );
 			if( $response->status() == 200 ){
 				if( $response->json() == null ){
-					return false;
+					return [
+						'error' => 1,
+					];
 				}
-				return $response->json();
+				return [
+					'error' => 0,
+					'data' => $response->json()
+				];
 			}
 			return [
+				'error' => 1,
 				'res' => $response,
 				'endpoint' => $endpoint,
 				'data' => $data,
 			];
 		}catch(\Exception $ex){
 			return [
+				'error' => 1,
 				'res' => $ex->getMessage(),
 				'endpoint' => $endpoint,
 				'data' => $data,
@@ -140,8 +147,12 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'CancelICPBinding', $data );
 		
-		$response = json_decode($response, true);
-		return $this->AES_256_decript($response['EncData']);
+		if( !$response['error'] ){
+			$response = json_decode($response, true);
+			return $this->AES_256_decript($response['EncData']);
+		}else{
+			return $response;
+		}
 	}
 	
 	/**
@@ -197,8 +208,12 @@ class IcashpayApi{
 		$response = $this->request_post( 'DeductICPOB', $data );
 		
 		
-		$response = json_decode($response, true);
-		return $this->AES_256_decript($response['EncData']);
+		if( !$response['error'] ){
+			$response = json_decode($response, true);
+			return $this->AES_256_decript($response['EncData']);
+		}else{
+			return $response;
+		}
 	}
 	
 	/**
@@ -210,7 +225,7 @@ class IcashpayApi{
 			'PlatformID' => $this->PlatformID,
 			'MerchantID' => $this->MerchantID,
 			'WalletID' => $this->WalletID,
-			'MerchantTradeNo' => ''
+			'MerchantTradeNo' => $request
 		];
 		
 		if( is_array($request) ){
@@ -219,8 +234,14 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'QueryTradeICPO', $data );
 		
-		$response = json_decode($response, true);
-		return $this->AES_256_decript($response['EncData']);
+		
+		if( !$response['error'] ){
+			$response = json_decode($response, true);
+			return $this->AES_256_decript($response['EncData']);
+		}else{
+			return $response;
+		}
+		
 	}
 	
 	/**
@@ -255,8 +276,12 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'RefundICPO', $data );
 		
-		$response = json_decode($response, true);
-		return $this->AES_256_decript($response['EncData']);
+		if( !$response['error'] ){
+			$response = json_decode($response, true);
+			return $this->AES_256_decript($response['EncData']);
+		}else{
+			return $response;
+		}
 	}
 	
 	public function generateQRfromGoogle( $chl, $widhtHeight ='300' ){
