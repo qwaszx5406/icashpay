@@ -28,7 +28,7 @@ class IcashpayApi{
 		$this->EncKeyID = config('icashpay.AES_key_ID');
 		$this->ServerPublicKey = config('icashpay.Server_Public_Key');
 		$this->ClientPublicKey = config('icashpay.Client_Public_Key');
-		$this->ClientPrivateKey = config('icashpay.Client_Private_Key');
+		$this->ClientPrivateKey = str_replace( [ "\t", "\n" ], '', config('icashpay.Client_Private_Key'));
 		$this->AES_256_key = config('icashpay.AES_256_key');
 		$this->iv = config('icashpay.iv');
 		$test_mode = config('icashpay.test_mode');
@@ -48,7 +48,7 @@ class IcashpayApi{
 		
 		$encrypt = openssl_encrypt( $data, 'aes-256-cbc', $this->AES_256_key, 0, $this->iv);
 		// print_r($encrypt);
-		return urlencode($encrypt);
+		return $encrypt;
 	}
 	
 	public function AES_256_decript( $data ){
@@ -118,7 +118,7 @@ class IcashpayApi{
 			$value = array_merge( $value, $request );
 		}
 		
-		$value = $this->AES_256_encript($value);
+		$value = urlencode($this->AES_256_encript($value));
 		
 		$url = sprintf( 'icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=%s&Valuetype=1', $value );
 		
@@ -148,8 +148,7 @@ class IcashpayApi{
 		$response = $this->request_post( 'CancelICPBinding', $data );
 		
 		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
-			$response = json_decode($response['data'], true);
-			return $this->AES_256_decript($response['EncData']);
+			return $this->AES_256_decript($response['data']['EncData']);
 		}else{
 			return $response;
 		}
@@ -209,8 +208,7 @@ class IcashpayApi{
 		
 		
 		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
-			$response = json_decode($response['data'], true);
-			return $this->AES_256_decript($response['EncData']);
+			return $this->AES_256_decript($response['data']['EncData']);
 		}else{
 			return $response;
 		}
@@ -236,8 +234,7 @@ class IcashpayApi{
 		
 		
 		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
-			$response = json_decode($response['data'], true);
-			return $this->AES_256_decript($response['EncData']);
+			return $this->AES_256_decript($response['data']['EncData']);
 		}else{
 			return $response;
 		}
@@ -277,8 +274,7 @@ class IcashpayApi{
 		$response = $this->request_post( 'RefundICPO', $data );
 		
 		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
-			$response = json_decode($response['data'], true);
-			return $this->AES_256_decript($response['EncData']);
+			return $this->AES_256_decript($response['data']['EncData']);
 		}else{
 			return $response;
 		}
