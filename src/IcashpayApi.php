@@ -28,7 +28,7 @@ class IcashpayApi{
 		$this->EncKeyID = config('icashpay.AES_key_ID');
 		$this->ServerPublicKey = config('icashpay.Server_Public_Key');
 		$this->ClientPublicKey = config('icashpay.Client_Public_Key');
-		$this->ClientPrivateKey = str_replace( [ "\t", "\n" ], '', config('icashpay.Client_Private_Key'));
+		$this->ClientPrivateKey = config('icashpay.Client_Private_Key');
 		$this->AES_256_key = config('icashpay.AES_256_key');
 		$this->iv = config('icashpay.iv');
 		$test_mode = config('icashpay.test_mode');
@@ -37,6 +37,14 @@ class IcashpayApi{
 		}else{
 			$this->gateway = config('icashpay.gateway');
 		}	
+	}
+	
+	function getSign($content, $privateKey){
+		$key = openssl_get_privatekey($privateKey);
+		openssl_sign($content, $signature, $key, "SHA256");
+		openssl_free_key($key);
+		$sign = base64_encode($signature);
+		return $sign;
 	}
 	
 	public function AES_256_encript( $data ){
@@ -62,7 +70,7 @@ class IcashpayApi{
 		try{
 			$response = Http::withHeaders([
 				'X-iCP-EncKeyID' => $this->EncKeyID,
-				'X-iCP-Signature' => $this->ClientPrivateKey,	
+				'X-iCP-Signature' => $this->getSign( $data['EncData'] , $this->ClientPrivateKey ),	
 			])->timeout(10)->post($this->gateway . '/' . $endpoint, $data );
 			if( $response->status() == 200 ){
 				if( $response->json() == null ){
