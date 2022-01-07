@@ -12,6 +12,8 @@ return [
 	'Client_Private_Key'=> '',
 	'AES_256_key'		=> '',
 	'iv'				=> '',
+	'bind_AES_256_key'		=> '',
+	'bind_iv'				=> '',
 	'test_mode'			=> true,
 	'gateway'			=> 'https://payment.icashpay.com.tw/api/Payment/Cashier/',
 	'test_gateway'		=> 'https://icp-payment-stage.icashpay.com.tw/api/Payment/Cashier/',

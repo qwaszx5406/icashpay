@@ -16,6 +16,9 @@ class IcashpayApi{
 	private $ClientPublicKey;
 	private $ClientPrivateKey;
 	private $AES_256_key;
+	private $iv;
+	private $Bind_AES_256_key;
+	private $Bind_iv;
 	private $gateway;		
 	private $test_gateway;		
 	
@@ -31,6 +34,8 @@ class IcashpayApi{
 		$this->ClientPrivateKey = config('icashpay.Client_Private_Key');
 		$this->AES_256_key = config('icashpay.AES_256_key');
 		$this->iv = config('icashpay.iv');
+		$this->Bind_AES_256_key = config('icashpay.bind_AES_256_key');
+		$this->Bind_iv = config('icashpay.bind_iv');
 		$test_mode = config('icashpay.test_mode');
 		if( $test_mode ){
 			$this->gateway = config('icashpay.test_gateway');
@@ -40,11 +45,26 @@ class IcashpayApi{
 	}
 	
 	function getSign($content, $privateKey){
+		$privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" .
+		wordwrap($privateKey, 64, "\n", true) .
+		"\n-----END RSA PRIVATE KEY-----";
 		$key = openssl_get_privatekey($privateKey);
 		openssl_sign($content, $signature, $key, "SHA256");
 		openssl_free_key($key);
 		$sign = base64_encode($signature);
 		return $sign;
+	}
+	
+	public function Bind_AES_256_encript( $data ){
+		// return $data;
+		/*********************************************/
+		if( is_array( $data ) ){
+			$data = json_encode( $data );
+		}
+		
+		$encrypt = openssl_encrypt( $data, 'aes-256-cbc', $this->Bind_AES_256_key, 0, $this->Bind_iv);
+		// print_r($encrypt);
+		return urlencode($encrypt);
 	}
 	
 	public function AES_256_encript( $data ){
@@ -68,10 +88,17 @@ class IcashpayApi{
 	
 	private function request_post( $endpoint, $data ){
 		try{
-			$response = Http::withHeaders([
+			
+			$data['X-iCP-Signature'] = $this->getSign( $data['EncData'] , $this->ClientPrivateKey );
+			$headers = [
 				'X-iCP-EncKeyID' => $this->EncKeyID,
-				'X-iCP-Signature' => $this->getSign( $data['EncData'] , $this->ClientPrivateKey ),	
-			])->timeout(10)->post($this->gateway . '/' . $endpoint, $data );
+				'X-iCP-Signature' => $data['X-iCP-Signature'],	
+			];
+			
+			$url = $this->gateway . '/' . $endpoint;
+			
+			$response = Http::withHeaders($headers)->timeout(10)->post( $url, $data );
+		
 			if( $response->status() == 200 ){
 				if( $response->json() == null ){
 					return [
@@ -107,7 +134,7 @@ class IcashpayApi{
 			'WalletID' => $this->WalletID,
 			'Version' => $this->Version,
 			'X-iCP-EncKeyID' => $this->EncKeyID,
-			'X-iCP-Signature' => $this->ClientPrivateKey,
+			'X-iCP-Signature' => '',
 			'EncData' => [],
 		];
 		return $data;
@@ -126,7 +153,7 @@ class IcashpayApi{
 			$value = array_merge( $value, $request );
 		}
 		
-		$value = urlencode($this->AES_256_encript($value));
+		$value = $this->Bind_AES_256_encript($value);
 		
 		$url = sprintf( 'icashpay://www.icashpay.com.tw/ICP?Action=Mainaction&Event=ICPOB001&Value=%s&Valuetype=1', $value );
 		
@@ -234,14 +261,11 @@ class IcashpayApi{
 			'MerchantTradeNo' => $request
 		];
 		
-		if( is_array($request) ){
-			$EncData = array_merge( $EncData, $request );
-		}
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'QueryTradeICPO', $data );
 		
 		
-		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
+		if( !$response['error'] && isset($response['data']['RtnCode']) && $response['data']['RtnCode'] == '0001' ){
 			return $this->AES_256_decript($response['data']['EncData']);
 		}else{
 			return $response;
