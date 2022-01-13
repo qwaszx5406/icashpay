@@ -127,19 +127,6 @@ class IcashpayApi{
         }
 	}
 	
-	private function get_requset_data(){
-		$data = [
-			'PlatformID' => $this->PlatformID,
-			'MerchantID' => $this->MerchantID,
-			'WalletID' => $this->WalletID,
-			'Version' => $this->Version,
-			'X-iCP-EncKeyID' => $this->EncKeyID,
-			'X-iCP-Signature' => '',
-			'EncData' => [],
-		];
-		return $data;
-	}
-	
 	public function mainaction( $request ){
 		$value = [
 			'UserID' => '',
@@ -167,7 +154,7 @@ class IcashpayApi{
 	 * 取消綁定
 	 */
 	public function CancelICPBinding($request){
-		$data = $this->get_requset_data();
+		$data = [];
 		$EncData = [
 			'PlatformID' => $this->PlatformID,
 			'MerchantID' => $this->MerchantID,
@@ -193,7 +180,7 @@ class IcashpayApi{
 	 * 綁定扣款
 	 */
 	public function DeductICPOB($request){
-		$data = $this->get_requset_data();
+		$data = [];
 		$EncData = [
 			'PlatformID' => $this->PlatformID,
 			'MerchantID' => $this->MerchantID,
@@ -253,7 +240,7 @@ class IcashpayApi{
 	 * 交易查詢
 	 */
 	public function QueryTradeICPO($request){
-		$data = $this->get_requset_data();
+		$data = [];
 		$EncData = [
 			'PlatformID' => $this->PlatformID,
 			'MerchantID' => $this->MerchantID,
@@ -277,7 +264,7 @@ class IcashpayApi{
 	 * 退貨
 	 */
 	public function RefundICPO($request){
-		$data = $this->get_requset_data();
+		$data = [];
 		$EncData = [
 			'PlatformID' => $this->PlatformID,
 			'MerchantID' => $this->MerchantID,
