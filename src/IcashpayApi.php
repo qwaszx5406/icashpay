@@ -239,7 +239,7 @@ class IcashpayApi{
 			$EncData = array_merge( $EncData, $request );
 		}
 		$data['EncData'] = $this->AES_256_encript($EncData);
-		$response = $this->request_post( 'DeductICPOB', $data );
+		$response = $this->request_post( 'ICPBindingDeduct', $data );
 		
 		
 		if( !$response['error'] && $response['data']['RtnCode'] == '0001' ){
