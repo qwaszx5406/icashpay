@@ -113,7 +113,7 @@ class IcashpayApi{
 			// fwrite( $file, $Signature . "\n" );
 			// fclose($file);
 		
-			$response = Http::withHeaders($headers)->timeout(10)->post( $url, $data );
+			$response = Http::withHeaders($headers)->asForm()->timeout(10)->post( $url, $data );
 		
 			if( $response->status() == 200 ){
 				if( $response->json() == null ){
@@ -185,17 +185,7 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'Binding/CancelICPBinding', $data );
 		
-		$return = [
-			'error' => $response['error']
-		];
-		if( !$response['error'] ){
-			$return['StatusCode'] = $response['data']['StatusCode'];
-			$return['StatusMessage'] = $response['data']['StatusMessage'];
-			$return['EncData'] = $this->AES_256_decript($response['data']['EncData']);
-		}else{
-			$return['message'] = '交易失敗';
-		}
-		return $return;
+		return $this->return_response($response);
 	}
 	
 	/**
@@ -239,17 +229,7 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'Binding/ICPBindingDeduct', $data );
 		
-		$return = [
-			'error' => $response['error']
-		];
-		if( !$response['error'] ){
-			$return['StatusCode'] = $response['data']['StatusCode'];
-			$return['StatusMessage'] = $response['data']['StatusMessage'];
-			$return['EncData'] = $this->AES_256_decript($response['data']['EncData']);
-		}else{
-			$return['message'] = '交易失敗';
-		}
-		return $return;
+		return $this->return_response($response);
 	}
 	
 	/**
@@ -268,18 +248,7 @@ class IcashpayApi{
 		$response = $this->request_post( 'Cashier/QueryTradeICPO', $data );
 		
 		
-		$return = [
-			'error' => $response['error']
-		];
-		if( !$response['error'] ){
-			$return['RtnCode'] = $response['data']['RtnCode'];
-			$return['RtnMsg'] = $response['data']['RtnMsg'];
-			$return['EncData'] = $this->AES_256_decript($response['data']['EncData']);
-		}else{
-			$return['message'] = '交易失敗';
-		}
-		return $return;
-		
+		return $this->return_response($response);
 	}
 	
 	/**
@@ -314,19 +283,7 @@ class IcashpayApi{
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'Cashier/RefundICPO', $data );
 		
-		$return = [
-			'error' => $response['error']
-		];
-		if( !$response['error'] ){
-			$return['RtnCode'] = $response['data']['RtnCode'];
-			$return['RtnMsg'] = $response['data']['RtnMsg'];
-			$return['TransactionID'] = $response['data']['TransactionID'];
-			$return['PaymentDate'] = $response['data']['PaymentDate'];
-			$return['RefundAmount'] = $response['data']['RefundAmount'];
-		}else{
-			$return['message'] = '交易失敗';
-		}
-		return $return;
+		return $this->return_response($response);
 	}
 	
 	public function generateQRfromGoogle( $chl, $widhtHeight ='300' ){
@@ -336,5 +293,31 @@ class IcashpayApi{
 			$widhtHeight,
 			$chl
 		);  
+	}
+
+	public function return_response($response){
+		$return = [
+			'error' => $response['error']
+		];
+		if( !$response['error'] ){
+			if( isset($response['data']['RtnCode']) ){
+				$return['RtnCode'] = $response['data']['RtnCode'];
+				$return['RtnMsg'] = $response['data']['RtnMsg'];
+				if( '0001' == $response['data']['RtnCode'] && isset($response['data']['EncData']) ){
+					$return['EncData'] = $this->AES_256_decript($response['data']['EncData']);
+				}
+			}else if( isset($response['data']['StatusCode']) ){
+				$return['StatusCode'] = $response['data']['StatusCode'];
+				$return['StatusMessage'] = $response['data']['StatusMessage'];
+				if( '0001' == $response['data']['StatusCode'] && isset($response['data']['EncData']) ){
+					$return['EncData'] = $this->AES_256_decript($response['data']['EncData']);
+				}
+			}
+			
+		}else{
+			$return['message'] = '交易失敗';
+		}
+		return $return;
+		
 	}
 }
