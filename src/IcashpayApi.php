@@ -174,14 +174,14 @@ class IcashpayApi{
 		$EncData = [
 			'PlatformID' => $this->PlatformID,
 			'MerchantID' => $this->MerchantID,
-			'WalletID' => $this->WalletID,
 			'MerchantTradeNo' => '',
-			'TokenNo' => '',
+			'Token' => '',
 			'CancelBindingDate' => ''
 		];
 		if( is_array($request) ){
 			$EncData = array_merge( $EncData, $request );
 		}
+		
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'Binding/CancelICPBinding', $data );
 		
@@ -207,6 +207,7 @@ class IcashpayApi{
 			'ItemAmt' => '',
 			'UtilityAmt' => '',
 			'CommAmt' => '',
+			'Amount' => '',
 			'ExceptAmt1' => '',
 			'ExceptAmt2' => '',
 			'RedeemFlag' => '',
@@ -220,12 +221,14 @@ class IcashpayApi{
 			// 'CustomField1' => '',
 			// 'CustomField2' => '',
 			// 'CustomField3' => '',
-			'TokenNo' => ''
+			'Token' => ''
 		];
 		
 		if( is_array($request) ){
 			$EncData = array_merge( $EncData, $request );
 		}
+		$EncData['Amount'] = $EncData['ItemAmt'] + $EncData['UtilityAmt'] + $EncData['CommAmt'];
+		
 		$data['EncData'] = $this->AES_256_encript($EncData);
 		$response = $this->request_post( 'Binding/ICPBindingDeduct', $data );
 		
@@ -304,13 +307,13 @@ class IcashpayApi{
 				$return['RtnCode'] = $response['data']['RtnCode'];
 				$return['RtnMsg'] = $response['data']['RtnMsg'];
 				if( '0001' == $response['data']['RtnCode'] && isset($response['data']['EncData']) ){
-					$return['EncData'] = $this->AES_256_decript($response['data']['EncData']);
+					$return['EncData'] = json_decode($this->AES_256_decript($response['data']['EncData']), true);
 				}
 			}else if( isset($response['data']['StatusCode']) ){
 				$return['StatusCode'] = $response['data']['StatusCode'];
 				$return['StatusMessage'] = $response['data']['StatusMessage'];
 				if( '0001' == $response['data']['StatusCode'] && isset($response['data']['EncData']) ){
-					$return['EncData'] = $this->AES_256_decript($response['data']['EncData']);
+					$return['EncData'] = json_decode($this->AES_256_decript($response['data']['EncData']), true);
 				}
 			}
 			
