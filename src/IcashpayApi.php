@@ -304,8 +304,8 @@ class IcashpayApi{
 		];
 		if( !$response['error'] ){
 			if( isset($response['data']['RtnCode']) ){
-				$return['RtnCode'] = $response['data']['RtnCode'];
-				$return['RtnMsg'] = $response['data']['RtnMsg'];
+				$return['StatusCode'] = $response['data']['RtnCode'];
+				$return['StatusMessage'] = $response['data']['RtnMsg'];
 				if( '0001' == $response['data']['RtnCode'] && isset($response['data']['EncData']) ){
 					$return['EncData'] = json_decode($this->AES_256_decript($response['data']['EncData']), true);
 				}
