@@ -128,7 +128,7 @@ class IcashpayApi{
 			}
 			return [
 				'error' => 1,
-				'res' => $response,
+				'res' => $response->body(),
 				'endpoint' => $endpoint,
 				'data' => $data,
 			];
