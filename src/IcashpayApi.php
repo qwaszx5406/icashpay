@@ -319,6 +319,7 @@ class IcashpayApi{
 			
 		}else{
 			$return['message'] = '交易失敗';
+			$return['data'] = $response;
 		}
 		return $return;
 		
